@@ -20,7 +20,7 @@ export function QueryState<T>({ query, what, children }: QueryStateProps<T>) {
 
   if (query.isError) {
     return (
-      <div role="alert" className="space-y-3 rounded-lg border border-danger bg-danger-soft p-4 text-danger-strong">
+      <div role="alert" className="space-y-3 rounded-xl border border-danger-line bg-danger-soft p-4 text-danger-ink">
         <p className="font-semibold">Could not load {what}.</p>
         <p className="text-sm">{query.error.message}</p>
         <Button onClick={() => query.refetch()}>Try again</Button>

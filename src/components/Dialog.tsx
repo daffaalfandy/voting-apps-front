@@ -24,7 +24,7 @@ export function Dialog({ open, onClose, title, children }: DialogProps) {
       ref={ref}
       onClose={onClose}
       aria-labelledby={titleId}
-      className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-lg border border-line bg-surface p-0 text-ink shadow-xl"
+      className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-xl border border-line bg-surface p-0 text-ink shadow-2xl"
     >
       {open && (
         <div className="p-6">
