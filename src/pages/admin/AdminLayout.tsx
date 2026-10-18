@@ -3,7 +3,7 @@ import { NavLink, Outlet, useOutletContext } from 'react-router';
 import { api } from '../../api/client';
 import type { Settings } from '../../api/types';
 import { useToast } from '../../components/Toast';
-import { Button, ErrorAlert } from '../../components/ui';
+import { Badge, Button, ErrorAlert } from '../../components/ui';
 
 interface AdminContext {
   /** Undefined while the lock state is still loading; treat as locked so nothing fires early. */
@@ -40,16 +40,16 @@ export function AdminLayout() {
 
   return (
     <div>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 border-b border-line-soft pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Election console</h1>
+          <h1 className="text-2xl font-bold text-ink-strong">Election console</h1>
           <p className="mt-1 text-ink-muted">Follow the count, keep the ballot tidy and manage who can vote.</p>
         </div>
         {settings.isSuccess && (
           <div className="flex items-center gap-3">
-            <p className="text-sm">
-              <span className="text-ink-muted">System: </span>
-              <span className="font-semibold">{locked ? 'locked' : 'unlocked'}</span>
+            <p className="flex items-center gap-2 text-sm font-bold">
+              System
+              <Badge tone={locked ? 'warn' : 'success'}>{locked ? 'Locked' : 'Unlocked'}</Badge>
             </p>
             <Button disabled={toggleLock.isPending} onClick={() => toggleLock.mutate(!locked)}>
               {locked ? 'Unlock system' : 'Lock system'}
@@ -69,21 +69,21 @@ export function AdminLayout() {
         </div>
       )}
       {locked && (
-        <p role="status" className="mt-4 rounded-md border border-warn-line bg-warn-soft px-4 py-3 text-sm text-warn">
-          <strong className="font-semibold">The system is locked.</strong> Users and candidates cannot be added, edited or
+        <p role="status" className="mt-4 rounded-lg border border-warn-line bg-warn-wash px-4 py-3 text-sm text-warn-ink">
+          <strong className="font-bold">The system is locked.</strong> Users and candidates cannot be added, edited or
           removed. Voting continues as normal.
         </p>
       )}
 
-      <nav aria-label="Election console" className="mt-6 border-b border-line">
-        <ul className="-mb-px flex gap-1 overflow-x-auto">
+      <nav aria-label="Election console" className="mt-5">
+        <ul className="inline-flex gap-1 rounded-lg bg-line-soft p-1">
           {tabs.map((tab) => (
             <li key={tab.to}>
               <NavLink
                 to={tab.to}
                 className={({ isActive }) =>
-                  `inline-flex min-h-11 items-center border-b-2 px-4 text-sm font-semibold transition-colors ${
-                    isActive ? 'border-primary text-ink' : 'border-transparent text-ink-muted hover:text-ink'
+                  `inline-flex min-h-11 items-center rounded-md px-4 text-sm font-bold transition-colors ${
+                    isActive ? 'bg-surface text-ink-strong shadow-xs' : 'text-ink hover:bg-surface-muted'
                   }`
                 }
               >
@@ -94,7 +94,7 @@ export function AdminLayout() {
         </ul>
       </nav>
 
-      <div className="pt-6">
+      <div className="pt-5">
         <Outlet context={{ locked } satisfies AdminContext} />
       </div>
     </div>
