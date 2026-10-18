@@ -3,7 +3,7 @@ import { homePathFor, useAuth } from './auth/AuthContext';
 import { RequireRole } from './auth/RequireRole';
 import { AppShell } from './components/AppShell';
 import { BallotPage } from './pages/BallotPage';
-import { LoginPage } from './pages/LoginPage';
+import { AdminLoginPage, VoterLoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { CandidatesPage } from './pages/admin/CandidatesPage';
@@ -20,7 +20,8 @@ export const router = createBrowserRouter([
     element: <AppShell />,
     children: [
       { index: true, element: <HomeRedirect /> },
-      { path: 'login', element: <LoginPage /> },
+      { path: 'login', element: <VoterLoginPage /> },
+      { path: 'admin/login', element: <AdminLoginPage /> },
       {
         path: 'vote',
         element: (

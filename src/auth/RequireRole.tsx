@@ -8,7 +8,7 @@ export function RequireRole({ role, children }: { role: Role; children: ReactNod
   const location = useLocation();
 
   if (!user) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    return <Navigate to={role === 'admin' ? '/admin/login' : '/login'} replace state={{ from: location.pathname }} />;
   }
   if (user.role !== role) {
     return <Navigate to={homePathFor(user)} replace />;
