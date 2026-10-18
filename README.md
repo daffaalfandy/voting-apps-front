@@ -38,12 +38,12 @@ npm run dev    # http://localhost:5173, /api is proxied to http://localhost:4000
 |---|---|---|
 | `/login` | voters | Email and vote code. The code is not case-sensitive and the dash is optional. |
 | `/admin/login` | administrators | Email and password, on a page of its own. |
-| `/vote` | voters | Pick a name or write one in, confirm, then see what was recorded. Typing a name that is already listed says so before submitting. While the system is locked it shows "Voting is closed" instead, and reopens on its own. |
+| `/vote` | voters | Pick a name or write one in, confirm, then see what was recorded. Typing a name that is already listed says so before submitting. Until the system is locked it shows "Voting has not started" instead, and the ballot appears on its own once voting opens. |
 | `/admin/results` | administrators | Votes cast, turnout, standings, and the voter participation list (who voted and when, never how). Refreshes every 10 seconds. Also holds "Reset the election". |
 | `/admin/candidates` | administrators | Add names; remove names that have no votes. |
 | `/admin/users` | administrators | Search, filter by voted / not voted, add, edit, suspend, reset a vote, delete. Adding a voter shows their vote code once; Edit can issue a new one if it is lost. |
 
-The lock button in the console closes voting and freezes users and candidates; controls that would change them are disabled and a banner explains why. Resetting the election (every vote and write-in name deleted, voters and listed names kept) only works while the system is locked, and asks you to type RESET to confirm.
+The lock button in the console is the election switch. Unlocked means preparing: users and candidates can change and voting has not started. Locked means the election is running: voters can vote, and controls that would change users or candidates are disabled, with a banner saying why. Resetting the election (every vote and write-in name deleted, voters and listed names kept) only works while unlocked, and asks you to type RESET to confirm.
 
 ## Design notes
 
