@@ -55,13 +55,13 @@ export function ResetElection({ results }: { results: Results }) {
         added stay.
       </p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Button variant="danger" disabled={locked !== true || nothingToReset} onClick={openDialog}>
+        <Button variant="danger" disabled={locked !== false || nothingToReset} onClick={openDialog}>
           Reset election
         </Button>
         {nothingToReset ? (
           <p className="text-sm text-ink-muted">Nothing to reset yet: no votes or write-in names.</p>
         ) : (
-          locked !== true && <p className="text-sm text-ink-muted">Lock the system first, so no votes arrive during the reset.</p>
+          locked !== false && <p className="text-sm text-ink-muted">Unlock the system first to close voting, so no votes arrive during the reset.</p>
         )}
       </div>
 
