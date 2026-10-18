@@ -69,8 +69,8 @@ export function AdminLayout() {
       )}
       {locked && (
         <p role="status" className="mt-4 rounded-lg border border-warn-line bg-warn-wash px-4 py-3 text-sm text-warn-ink">
-          <strong className="font-bold">The system is locked.</strong> Users and candidates cannot be added, edited or
-          removed. Voting continues as normal.
+          <strong className="font-bold">The system is locked.</strong> Voting is closed, and users and candidates cannot
+          be added, edited or removed.
         </p>
       )}
 
