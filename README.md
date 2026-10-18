@@ -46,7 +46,7 @@ The lock button in the console freezes users and candidates. Controls that would
 
 ## Design notes
 
-- Colours (slate with an indigo primary) and the Plus Jakarta Sans typeface come from the original mockup. Colours are CSS variables in `src/index.css`; the dark set applies when the operating system is in dark mode. Every text colour pair meets WCAG AA in both themes.
+- Colours and the Plus Jakarta Sans typeface come from the original mockup: a slate-950 header, slate surfaces, indigo for actions and selection, and status colours that mean the same thing everywhere (emerald for leading, voted and active; amber for write-ins and the lock; rose for errors, suspension and deletion). They are CSS variables in `src/index.css`. The app is light only. Every text colour pair meets WCAG AA.
 - The radio buttons are drawn as the oval you fill in on a paper ballot. The same filled oval marks the leader in the results and sits in the wordmark.
 - Dialogs use the native `<dialog>` element, so Escape, focus trapping and returning focus work without extra code. Radio groups are native inputs, so arrow keys work.
 - Every data view has a loading state, an error state with a retry button, and an empty state that says what to do next.
