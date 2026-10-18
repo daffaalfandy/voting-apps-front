@@ -4,9 +4,6 @@ server {
   root /usr/share/nginx/html;
   index index.html;
 
-  add_header X-Content-Type-Options nosniff always;
-  add_header Referrer-Policy same-origin always;
-
   # Same-origin API: the browser never talks to the backend directly, so no CORS setup is needed.
   location /api/ {
     proxy_pass ${API_UPSTREAM};
