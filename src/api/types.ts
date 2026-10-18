@@ -38,3 +38,11 @@ export interface Results {
 export interface Settings {
   locked: boolean;
 }
+
+export interface Participant {
+  id: string;
+  name: string;
+  email: string;
+  status: UserStatus;
+  votedAt: string;
+}
