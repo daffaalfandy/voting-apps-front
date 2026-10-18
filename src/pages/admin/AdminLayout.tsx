@@ -31,7 +31,7 @@ export function AdminLayout() {
       api<{ settings: Settings }>('/settings', { method: 'PUT', body: { locked } }).then((res) => res.settings),
     onSuccess: (next) => {
       queryClient.setQueryData(['settings'], next);
-      notify(next.locked ? 'System locked' : 'System unlocked');
+      notify(next.locked ? 'System locked: voting is open' : 'System unlocked: voting is closed');
     },
   });
 
@@ -67,10 +67,16 @@ export function AdminLayout() {
           <ErrorAlert>{toggleLock.error.message}</ErrorAlert>
         </div>
       )}
-      {locked && (
+      {locked === true && (
         <p role="status" className="mt-4 rounded-lg border border-warn-line bg-warn-wash px-4 py-3 text-sm text-warn-ink">
-          <strong className="font-bold">The system is locked.</strong> Voting is closed, and users and candidates cannot
-          be added, edited or removed.
+          <strong className="font-bold">The election is running.</strong> Voters can vote, and users and candidates are
+          locked. Unlocking closes voting so you can make changes.
+        </p>
+      )}
+      {locked === false && (
+        <p role="status" className="mt-4 rounded-lg border border-line bg-surface-muted px-4 py-3 text-sm text-ink">
+          <strong className="font-bold">Preparing the election.</strong> Voting has not started. Set up users and
+          candidates, then lock the system to open voting.
         </p>
       )}
 
