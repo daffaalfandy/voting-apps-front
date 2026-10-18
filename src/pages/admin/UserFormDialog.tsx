@@ -9,7 +9,6 @@ import { Button, ErrorAlert, Field, SelectField } from '../../components/ui';
 
 interface UserFormDialogProps {
   open: boolean;
-  /** The user being edited, or null to create one. */
   user: User | null;
   onClose(): void;
 }
@@ -17,7 +16,6 @@ interface UserFormDialogProps {
 function VoteCodeReveal({ code, name }: { code: string; name: string }) {
   const [copied, setCopied] = useState(false);
 
-  // Feedback stays inside the dialog: a toast would sit behind the modal backdrop.
   async function copy() {
     try {
       await navigator.clipboard.writeText(code);

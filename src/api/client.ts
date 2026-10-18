@@ -1,6 +1,5 @@
 const TOKEN_KEY = 'voting-app.token';
 
-// Storage can throw in private windows or when site data is blocked; treat that as "no session".
 export const tokenStore = {
   get(): string | null {
     try {
@@ -13,14 +12,14 @@ export const tokenStore = {
     try {
       localStorage.setItem(TOKEN_KEY, token);
     } catch {
-      /* session lasts until reload */
+      return;
     }
   },
   clear() {
     try {
       localStorage.removeItem(TOKEN_KEY);
     } catch {
-      /* nothing stored */
+      return;
     }
   },
 };

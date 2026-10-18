@@ -21,7 +21,6 @@ export function AppShell() {
       >
         Skip to main content
       </a>
-      {/* A lighter focus ring, since the default indigo is too dark against the slate-950 bar. */}
       <header className="sticky top-0 z-40 border-b border-header-hover bg-header text-header-ink [--focus:#818cf8]">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2">
           <Link to="/" className="inline-flex min-h-11 items-center rounded-lg">

@@ -1,6 +1,5 @@
 import { useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react';
 
-/** White panel with the mockup's slate-300 border. */
 export const card = 'rounded-xl border border-line bg-surface shadow-xs';
 
 type Variant = 'primary' | 'secondary' | 'warn' | 'danger' | 'quiet';

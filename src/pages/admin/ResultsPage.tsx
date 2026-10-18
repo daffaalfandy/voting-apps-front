@@ -146,7 +146,6 @@ function ParticipationLedger() {
   );
 }
 
-// Mockup colour coding: leader emerald, write-in amber, everyone else indigo.
 function barColour(candidate: Standing, isLeader: boolean) {
   if (isLeader) return 'bg-success';
   if (candidate.isWriteIn) return 'bg-warn';

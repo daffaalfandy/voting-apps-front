@@ -16,7 +16,6 @@ export interface Candidate {
   id: string;
   name: string;
   isWriteIn: boolean;
-  /** Present for administrators only. */
   voteCount?: number;
 }
 

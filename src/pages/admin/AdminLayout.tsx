@@ -6,7 +6,6 @@ import { useToast } from '../../components/Toast';
 import { Badge, Button, ErrorAlert } from '../../components/ui';
 
 interface AdminContext {
-  /** Undefined while the lock state is still loading; treat as locked so nothing fires early. */
   locked: boolean | undefined;
 }
 

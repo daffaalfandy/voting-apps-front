@@ -12,7 +12,6 @@ import { router } from './router';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Client errors (401, 403, 404) will not change on retry; network and server errors might.
       retry: (failureCount, error) => {
         const clientError = error instanceof ApiError && error.status >= 400 && error.status < 500;
         return !clientError && failureCount < 2;

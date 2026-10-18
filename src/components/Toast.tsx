@@ -17,7 +17,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext value={notify}>
       {children}
-      {/* The live region stays mounted so screen readers announce each new message. */}
       <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-4 bottom-4 z-50 flex justify-center sm:justify-end">
         {message && (
           <p className="rounded-lg border border-header-hover bg-header px-4 py-3 text-sm font-semibold text-header-ink shadow-xl">{message}</p>

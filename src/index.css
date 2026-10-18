@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 
-/* Values are the mockup's Tailwind colours (slate, indigo, emerald, amber, rose). Light only, by the owner's choice. */
 :root {
   color-scheme: light;
 
@@ -106,7 +105,6 @@
 }
 
 @layer components {
-  /* Identity motif: the oval a voter fills in on a paper ballot. Native radio, so keyboard and screen readers work unchanged. */
   .ballot-mark {
     appearance: none;
     flex-shrink: 0;

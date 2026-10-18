@@ -4,7 +4,6 @@ import { Button } from './ui';
 
 interface QueryStateProps<T> {
   query: UseQueryResult<T>;
-  /** What is being loaded, e.g. "results", used in the loading and error copy. */
   what: string;
   children(data: T): ReactNode;
 }

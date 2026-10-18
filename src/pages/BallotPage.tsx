@@ -76,7 +76,6 @@ function Ballot() {
       notify('Vote recorded');
     },
     onError: (err) => {
-      // Already voted in another tab: show the receipt instead of the ballot.
       if (err instanceof ApiError && err.status === 409) {
         void queryClient.invalidateQueries({ queryKey: ['myVote'] });
       }

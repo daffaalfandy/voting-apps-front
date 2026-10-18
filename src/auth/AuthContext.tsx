@@ -5,7 +5,6 @@ import type { User } from '../api/types';
 
 interface AuthState {
   user: User | null;
-  /** True until a stored token has been checked against the API. */
   restoring: boolean;
   voterLogin(email: string, code: string): Promise<User>;
   adminLogin(email: string, password: string): Promise<User>;

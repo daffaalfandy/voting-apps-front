@@ -7,7 +7,6 @@ interface DialogProps {
   children: ReactNode;
 }
 
-// Native modal <dialog>: the browser handles Escape, focus containment, inert background and focus return.
 export function Dialog({ open, onClose, title, children }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
