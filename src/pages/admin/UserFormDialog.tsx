@@ -14,6 +14,34 @@ interface UserFormDialogProps {
   onClose(): void;
 }
 
+function VoteCodeReveal({ code, name }: { code: string; name: string }) {
+  const [copied, setCopied] = useState(false);
+
+  // Feedback stays inside the dialog: a toast would sit behind the modal backdrop.
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  return (
+    <div className="rounded-lg border border-success-line bg-success-soft p-4 text-success-ink">
+      <p className="text-sm font-bold">Vote code for {name}</p>
+      <p className="mt-1 text-2xl font-extrabold tracking-wider tabular-nums select-all">{code}</p>
+      <p className="mt-2 text-sm">
+        Give it to {name} privately. It is shown only now; if it gets lost, issue a new one from Edit.
+      </p>
+      <Button onClick={copy} className="mt-3">
+        <span aria-live="polite">{copied ? 'Copied' : 'Copy code'}</span>
+      </Button>
+    </div>
+  );
+}
+
 export function UserFormDialog({ open, user, onClose }: UserFormDialogProps) {
   const queryClient = useQueryClient();
   const notify = useToast();
@@ -22,36 +50,60 @@ export function UserFormDialog({ open, user, onClose }: UserFormDialogProps) {
   const [email, setEmail] = useState(user?.email ?? '');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<Role>(user?.role ?? 'voter');
+  const [issuedCode, setIssuedCode] = useState<{ code: string; name: string } | null>(null);
 
   const isSelf = user !== null && user.id === me?.id;
-  const roleLockedReason = isSelf
-    ? 'You cannot change your own role.'
-    : user?.hasVoted
-      ? 'This voter has already voted, so their role stays the same.'
-      : undefined;
+  const needsPassword = user ? user.role === 'admin' : role === 'admin';
+
+  const refresh = () => {
+    void queryClient.invalidateQueries({ queryKey: ['users'] });
+    void queryClient.invalidateQueries({ queryKey: ['results'] });
+    void queryClient.invalidateQueries({ queryKey: ['participation'] });
+  };
 
   const save = useMutation({
     mutationFn: () => {
       if (!user) {
-        return api<{ user: User }>('/users', { method: 'POST', body: { name, email, password, role } });
+        const body = role === 'admin' ? { name, email, role, password } : { name, email, role };
+        return api<{ user: User; voteCode?: string }>('/users', { method: 'POST', body });
       }
       const changes: Record<string, string> = { name, email };
-      if (role !== user.role) changes.role = role;
       if (password) changes.password = password;
-      return api<{ user: User }>(`/users/${user.id}`, { method: 'PATCH', body: changes });
+      return api<{ user: User; voteCode?: string }>(`/users/${user.id}`, { method: 'PATCH', body: changes });
     },
-    onSuccess: ({ user: saved }) => {
-      void queryClient.invalidateQueries({ queryKey: ['users'] });
-      void queryClient.invalidateQueries({ queryKey: ['results'] });
+    onSuccess: ({ user: saved, voteCode }) => {
+      refresh();
       if (isSelf) void refreshUser();
       notify(user ? `${saved.name} updated` : `${saved.name} added`);
-      onClose();
+      if (voteCode) {
+        setIssuedCode({ code: voteCode, name: saved.name });
+      } else {
+        onClose();
+      }
     },
+  });
+
+  const reissue = useMutation({
+    mutationFn: (target: User) => api<{ voteCode: string }>(`/users/${target.id}/vote-code`, { method: 'POST' }),
+    onSuccess: ({ voteCode }, target) => setIssuedCode({ code: voteCode, name: target.name }),
   });
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
     save.mutate();
+  }
+
+  if (!user && issuedCode) {
+    return (
+      <Dialog open={open} onClose={onClose} title={`${issuedCode.name} added`}>
+        <VoteCodeReveal code={issuedCode.code} name={issuedCode.name} />
+        <div className="mt-6 flex justify-end">
+          <Button variant="primary" onClick={onClose}>
+            Done
+          </Button>
+        </div>
+      </Dialog>
+    );
   }
 
   return (
@@ -67,28 +119,53 @@ export function UserFormDialog({ open, user, onClose }: UserFormDialogProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <Field
-          label={user ? 'New password' : 'Password'}
-          type="password"
-          required={!user}
-          minLength={8}
-          autoComplete="new-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          hint={user ? 'Leave blank to keep the current password.' : 'At least 8 characters. Share it with the person directly.'}
-        />
-        <SelectField
-          label="Role"
-          value={role}
-          disabled={roleLockedReason !== undefined}
-          onChange={(e) => setRole(e.target.value as Role)}
-          hint={roleLockedReason ?? 'Voters can only vote. Administrators run this console and cannot vote.'}
-        >
-          <option value="voter">Voter</option>
-          <option value="admin">Administrator</option>
-        </SelectField>
+        {!user && (
+          <SelectField
+            label="Role"
+            value={role}
+            onChange={(e) => setRole(e.target.value as Role)}
+            hint={
+              role === 'voter'
+                ? 'A vote code is generated when you save. Voters sign in with their email and that code.'
+                : 'Administrators run this console with a password and cannot vote.'
+            }
+          >
+            <option value="voter">Voter</option>
+            <option value="admin">Administrator</option>
+          </SelectField>
+        )}
+        {needsPassword && (
+          <Field
+            label={user ? 'New password' : 'Password'}
+            type="password"
+            required={!user}
+            minLength={8}
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            hint={user ? 'Leave blank to keep the current password.' : 'At least 8 characters.'}
+          />
+        )}
+
+        {user?.role === 'voter' && (
+          <div className="space-y-3 rounded-lg border border-line-soft bg-surface-muted p-4">
+            <p className="text-sm font-bold">Vote code</p>
+            {issuedCode ? (
+              <VoteCodeReveal code={issuedCode.code} name={issuedCode.name} />
+            ) : (
+              <>
+                <p className="text-sm text-ink-muted">Lost code? Issuing a new one stops the old code from working.</p>
+                {reissue.isError && <ErrorAlert>{reissue.error.message}</ErrorAlert>}
+                <Button disabled={reissue.isPending} onClick={() => reissue.mutate(user)}>
+                  {reissue.isPending ? 'Issuing…' : 'Issue new code'}
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+
         <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={onClose}>{issuedCode ? 'Close' : 'Cancel'}</Button>
           <Button type="submit" variant="primary" disabled={save.isPending}>
             {save.isPending ? 'Saving…' : user ? 'Save changes' : 'Add user'}
           </Button>
