@@ -1,6 +1,6 @@
-# CivicVote web
+# Voting Application web
 
-Web client for the CivicVote voting app: a one-screen ballot for voters and an election console for administrators.
+Web client for the voting application: a one-screen ballot for voters and an election console for administrators.
 
 React 19, Vite, TypeScript, Tailwind CSS 4, React Router and TanStack Query. It talks to the API in [`voting-apps-back`](../voting-apps-back).
 
@@ -14,13 +14,13 @@ The only requirement is Docker with Compose v2.
 docker compose up --build
 ```
 
-Open http://localhost:3000. The sign-in accounts are listed in the backend README.
+Voters open http://localhost:3000; administrators open http://localhost:3000/admin/login. The seeded accounts and vote codes are listed in the backend README.
 
 **On its own**, pointing at an API that is already running:
 
 ```bash
-docker build -t civicvote-web .
-docker run --rm -p 3000:80 -e API_UPSTREAM=http://host.docker.internal:4000 civicvote-web
+docker build -t voting-app-web .
+docker run --rm -p 3000:80 -e API_UPSTREAM=http://host.docker.internal:4000 voting-app-web
 ```
 
 The image serves the built app with nginx and forwards `/api` to `API_UPSTREAM`, so the browser only ever talks to one origin and the API needs no CORS setup.
@@ -36,11 +36,12 @@ npm run dev    # http://localhost:5173, /api is proxied to http://localhost:4000
 
 | Path | Who | What it is for |
 |---|---|---|
-| `/login` | everyone | Email and password. Each role lands on its own start page. |
+| `/login` | voters | Email and vote code. The code is not case-sensitive and the dash is optional. |
+| `/admin/login` | administrators | Email and password, on a page of its own. |
 | `/vote` | voters | Pick a name or write one in, confirm, then see what was recorded. Typing a name that is already listed says so before submitting. |
-| `/admin/results` | administrators | Votes cast, turnout and standings. Refreshes every 10 seconds. |
+| `/admin/results` | administrators | Votes cast, turnout, standings, and the voter participation list (who voted and when, never how). Refreshes every 10 seconds. |
 | `/admin/candidates` | administrators | Add names; remove names that have no votes. |
-| `/admin/users` | administrators | Search, filter by voted / not voted, add, edit, suspend, reset a vote, delete. |
+| `/admin/users` | administrators | Search, filter by voted / not voted, add, edit, suspend, reset a vote, delete. Adding a voter shows their vote code once; Edit can issue a new one if it is lost. |
 
 The lock button in the console freezes users and candidates. Controls that would change them are disabled and a banner explains why; voting keeps working.
 
