@@ -50,6 +50,7 @@ export function UsersPage() {
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: ['users'] });
     void queryClient.invalidateQueries({ queryKey: ['results'] });
+    void queryClient.invalidateQueries({ queryKey: ['participation'] });
   };
 
   const setStatus = useMutation({

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router';
 import { api } from '../../api/client';
 import type { Participant, Results, Standing } from '../../api/types';
@@ -7,6 +7,7 @@ import { Badge, Button, WriteInTag, card } from '../../components/ui';
 import { formatDateTime, formatTime, percent, plural } from '../../lib/format';
 
 export function ResultsPage() {
+  const queryClient = useQueryClient();
   const results = useQuery({
     queryKey: ['results'],
     queryFn: () => api<Results>('/results'),
@@ -45,7 +46,13 @@ export function ResultsPage() {
             </div>
             <div className="flex items-center gap-3 text-sm text-ink-muted">
               <span aria-live="polite">Updated {formatTime(new Date(results.dataUpdatedAt))}</span>
-              <Button disabled={results.isFetching} onClick={() => results.refetch()}>
+              <Button
+                disabled={results.isFetching}
+                onClick={() => {
+                  void results.refetch();
+                  void queryClient.invalidateQueries({ queryKey: ['participation'] });
+                }}
+              >
                 {results.isFetching ? 'Refreshing…' : 'Refresh'}
               </Button>
             </div>
