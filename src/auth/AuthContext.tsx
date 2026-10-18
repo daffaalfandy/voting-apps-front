@@ -7,7 +7,8 @@ interface AuthState {
   user: User | null;
   /** True until a stored token has been checked against the API. */
   restoring: boolean;
-  login(email: string, password: string): Promise<User>;
+  voterLogin(email: string, code: string): Promise<User>;
+  adminLogin(email: string, password: string): Promise<User>;
   logout(): void;
   refreshUser(): Promise<void>;
 }
@@ -41,19 +42,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setRestoring(false));
   }, [refreshUser, logout]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const res = await api<{ token: string; user: User }>('/auth/login', {
-      method: 'POST',
-      body: { email, password },
-    });
+  const startSession = useCallback(async (path: string, body: object) => {
+    const res = await api<{ token: string; user: User }>(path, { method: 'POST', body });
     tokenStore.set(res.token);
     setUser(res.user);
     return res.user;
   }, []);
 
+  const voterLogin = useCallback(
+    (email: string, code: string) => startSession('/auth/login', { email, code }),
+    [startSession],
+  );
+
+  const adminLogin = useCallback(
+    (email: string, password: string) => startSession('/auth/admin/login', { email, password }),
+    [startSession],
+  );
+
   const value = useMemo(
-    () => ({ user, restoring, login, logout, refreshUser }),
-    [user, restoring, login, logout, refreshUser],
+    () => ({ user, restoring, voterLogin, adminLogin, logout, refreshUser }),
+    [user, restoring, voterLogin, adminLogin, logout, refreshUser],
   );
 
   return <AuthContext value={value}>{children}</AuthContext>;
