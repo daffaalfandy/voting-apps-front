@@ -1,4 +1,4 @@
-const TOKEN_KEY = 'civicvote.token';
+const TOKEN_KEY = 'voting-app.token';
 
 // Storage can throw in private windows or when site data is blocked; treat that as "no session".
 export const tokenStore = {

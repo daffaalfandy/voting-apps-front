@@ -5,7 +5,7 @@ export function Wordmark() {
   return (
     <span className="inline-flex items-center gap-2 text-lg font-extrabold tracking-tight">
       <span aria-hidden="true" className="ballot-mark border-primary-bright bg-primary-bright" data-filled="" />
-      CivicVote
+      Voting Application
     </span>
   );
 }
