@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { api, ApiError } from '../api/client';
-import type { Candidate, MyVote } from '../api/types';
+import type { Candidate, MyVote, Settings } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { Dialog } from '../components/Dialog';
 import { QueryState } from '../components/QueryState';
@@ -19,12 +19,40 @@ export function BallotPage() {
     queryFn: () => api<{ vote: MyVote | null }>('/votes/me').then((res) => res.vote),
   });
 
+  const settings = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => api<{ settings: Settings }>('/settings').then((res) => res.settings),
+    refetchInterval: 15_000,
+  });
+
   return (
     <div className="mx-auto max-w-xl">
       <QueryState query={myVote} what="your ballot">
-        {(vote) => (vote ? <VoteReceipt vote={vote} /> : <Ballot />)}
+        {(vote) =>
+          vote ? (
+            <VoteReceipt vote={vote} />
+          ) : (
+            <QueryState query={settings} what="the ballot">
+              {({ locked }) => (locked ? <VotingClosed /> : <Ballot />)}
+            </QueryState>
+          )
+        }
       </QueryState>
     </div>
+  );
+}
+
+function VotingClosed() {
+  return (
+    <section aria-labelledby="closed-heading" className={`p-5 sm:p-6 ${card}`}>
+      <h1 id="closed-heading" className="text-2xl font-bold text-ink-strong">
+        Voting is closed
+      </h1>
+      <p className="mt-5 rounded-lg border border-warn-line bg-warn-wash p-4 text-warn-ink">
+        The election administrator has closed voting for now. Keep this page open; the ballot comes back as soon as
+        voting reopens.
+      </p>
+    </section>
   );
 }
 
@@ -78,6 +106,9 @@ function Ballot() {
     onError: (err) => {
       if (err instanceof ApiError && err.status === 409) {
         void queryClient.invalidateQueries({ queryKey: ['myVote'] });
+      }
+      if (err instanceof ApiError && err.status === 423) {
+        void queryClient.invalidateQueries({ queryKey: ['settings'] });
       }
     },
   });
