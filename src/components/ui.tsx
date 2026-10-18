@@ -1,14 +1,18 @@
 import { useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react';
 
-type Variant = 'primary' | 'secondary' | 'danger' | 'quiet';
+/** White panel with the mockup's slate-300 border. */
+export const card = 'rounded-xl border border-line bg-surface shadow-xs';
+
+type Variant = 'primary' | 'secondary' | 'warn' | 'danger' | 'quiet';
 
 const buttonBase =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-55';
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-55';
 
 const buttonVariants: Record<Variant, string> = {
-  primary: 'bg-primary text-on-primary hover:enabled:bg-primary-hover',
-  secondary: 'border border-line-strong bg-surface text-ink hover:enabled:bg-surface-muted',
-  danger: 'border border-danger bg-surface text-danger hover:enabled:bg-danger-soft',
+  primary: 'bg-primary text-on-primary shadow-xs hover:enabled:bg-primary-hover',
+  secondary: 'border border-line bg-surface text-ink hover:enabled:bg-surface-muted',
+  warn: 'border border-warn-line bg-warn-wash text-warn-ink hover:enabled:bg-warn-soft',
+  danger: 'border border-danger-line bg-surface text-danger-strong hover:enabled:bg-danger-soft',
   quiet: 'text-ink hover:enabled:bg-surface-muted',
 };
 
@@ -20,8 +24,25 @@ export function Button({ variant = 'secondary', className = '', ...props }: Butt
   return <button type="button" className={`${buttonBase} ${buttonVariants[variant]} ${className}`} {...props} />;
 }
 
+type Tone = 'neutral' | 'success' | 'warn' | 'danger';
+
+const badgeTones: Record<Tone, string> = {
+  neutral: 'border-line bg-surface-muted text-ink',
+  success: 'border-success-line bg-success-soft text-success-ink',
+  warn: 'border-warn-line bg-warn-soft text-warn-ink',
+  danger: 'border-danger-line bg-danger-soft text-danger-ink',
+};
+
+export function Badge({ tone, children }: { tone: Tone; children: ReactNode }) {
+  return (
+    <span className={`inline-flex items-center rounded border px-2 py-0.5 text-xs font-bold ${badgeTones[tone]}`}>{children}</span>
+  );
+}
+
+export const WriteInTag = () => <Badge tone="warn">Write-in</Badge>;
+
 const controlClass =
-  'block min-h-11 w-full rounded-md border border-line-strong bg-surface px-3 text-base text-ink placeholder:text-ink-muted disabled:bg-surface-muted';
+  'block min-h-11 w-full rounded-lg border border-line-strong bg-surface px-3 text-base text-ink placeholder:text-ink-muted disabled:bg-surface-muted';
 
 interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -34,7 +55,7 @@ export function Field({ label, hint, id, ...props }: FieldProps) {
   const hintId = hint ? `${inputId}-hint` : undefined;
   return (
     <div className="space-y-1.5">
-      <label htmlFor={inputId} className="block text-sm font-semibold">
+      <label htmlFor={inputId} className="block text-sm font-bold text-ink">
         {label}
       </label>
       <input id={inputId} aria-describedby={hintId} className={controlClass} {...props} />
@@ -57,7 +78,7 @@ export function SelectField({ label, hint, children, ...props }: SelectFieldProp
   const hintId = hint ? `${id}-hint` : undefined;
   return (
     <div className="space-y-1.5">
-      <label htmlFor={id} className="block text-sm font-semibold">
+      <label htmlFor={id} className="block text-sm font-bold text-ink">
         {label}
       </label>
       <select id={id} aria-describedby={hintId} className={controlClass} {...props}>
@@ -74,14 +95,8 @@ export function SelectField({ label, hint, children, ...props }: SelectFieldProp
 
 export function ErrorAlert({ children }: { children: ReactNode }) {
   return (
-    <p role="alert" className="rounded-md border border-danger bg-danger-soft px-3 py-2 text-sm font-medium text-danger-strong">
+    <p role="alert" className="rounded-lg border border-danger-line bg-danger-soft px-3 py-2 text-sm font-bold text-danger-ink">
       {children}
     </p>
-  );
-}
-
-export function WriteInTag() {
-  return (
-    <span className="rounded border border-line-strong px-1.5 py-0.5 text-xs font-semibold text-ink-muted">Write-in</span>
   );
 }
