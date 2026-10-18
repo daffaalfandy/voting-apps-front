@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
 import { api } from '../../api/client';
-import type { Results, Standing } from '../../api/types';
+import type { Participant, Results, Standing } from '../../api/types';
 import { QueryState } from '../../components/QueryState';
 import { Badge, Button, WriteInTag, card } from '../../components/ui';
-import { formatTime, percent, plural } from '../../lib/format';
+import { formatDateTime, formatTime, percent, plural } from '../../lib/format';
 
 export function ResultsPage() {
   const results = useQuery({
@@ -64,9 +64,73 @@ export function ResultsPage() {
               <Standings data={data} />
             )}
           </section>
+
+          <ParticipationLedger />
         </div>
       )}
     </QueryState>
+  );
+}
+
+function ParticipationLedger() {
+  const participation = useQuery({
+    queryKey: ['participation'],
+    queryFn: () => api<{ participants: Participant[] }>('/participation').then((res) => res.participants),
+    refetchInterval: 10_000,
+  });
+
+  return (
+    <section aria-labelledby="participation-heading" className={`p-5 ${card}`}>
+      <h2 id="participation-heading" className="text-lg font-bold text-ink-strong">
+        Voter participation
+      </h2>
+      <p className="mt-1 text-sm text-ink-muted">Who has cast a ballot, newest first. How each person voted is never shown.</p>
+      <div className="mt-4">
+        <QueryState query={participation} what="voter participation">
+          {(participants) =>
+            participants.length === 0 ? (
+              <p className="text-ink-muted">No ballots cast yet. Voters appear here as soon as they vote.</p>
+            ) : (
+              <table className="w-full text-left text-sm">
+                <caption className="sr-only">Voters who have cast a ballot</caption>
+                <thead className="border-b border-line">
+                  <tr>
+                    <th scope="col" className="py-2 pr-3 font-bold">
+                      Voter
+                    </th>
+                    <th scope="col" className="py-2 pr-3 font-bold">
+                      Voted
+                    </th>
+                    <th scope="col" className="hidden py-2 font-bold sm:table-cell">
+                      Ballot
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line-soft">
+                  {participants.map((participant) => (
+                    <tr key={participant.id}>
+                      <td className="py-3 pr-3 align-top">
+                        <span className="block font-bold text-ink-strong">{participant.name}</span>
+                        <span className="block break-all text-ink-muted">{participant.email}</span>
+                        {participant.status === 'suspended' && (
+                          <span className="mt-1 inline-block">
+                            <Badge tone="danger">Suspended</Badge>
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 pr-3 align-top tabular-nums">{formatDateTime(participant.votedAt)}</td>
+                      <td className="hidden py-3 align-top sm:table-cell">
+                        <Badge tone="success">Ballot cast</Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )
+          }
+        </QueryState>
+      </div>
+    </section>
   );
 }
 
