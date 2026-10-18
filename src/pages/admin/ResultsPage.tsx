@@ -105,7 +105,7 @@ function ParticipationLedger() {
                     <th scope="col" className="py-2 pr-3 font-bold">
                       Voter
                     </th>
-                    <th scope="col" className="py-2 pr-3 font-bold">
+                    <th scope="col" className="hidden py-2 pr-3 font-bold sm:table-cell">
                       Voted
                     </th>
                     <th scope="col" className="hidden py-2 font-bold sm:table-cell">
@@ -118,14 +118,19 @@ function ParticipationLedger() {
                     <tr key={participant.id}>
                       <td className="py-3 pr-3 align-top">
                         <span className="block font-bold text-ink-strong">{participant.name}</span>
-                        <span className="block break-all text-ink-muted">{participant.email}</span>
+                        <span className="block text-ink-muted [overflow-wrap:anywhere]">{participant.email}</span>
+                        <span className="mt-1 block text-ink-muted tabular-nums sm:hidden">
+                          Voted {formatDateTime(participant.votedAt)}
+                        </span>
                         {participant.status === 'suspended' && (
                           <span className="mt-1 inline-block">
                             <Badge tone="danger">Suspended</Badge>
                           </span>
                         )}
                       </td>
-                      <td className="py-3 pr-3 align-top tabular-nums">{formatDateTime(participant.votedAt)}</td>
+                      <td className="hidden py-3 pr-3 align-top tabular-nums sm:table-cell">
+                        {formatDateTime(participant.votedAt)}
+                      </td>
                       <td className="hidden py-3 align-top sm:table-cell">
                         <Badge tone="success">Ballot cast</Badge>
                       </td>
