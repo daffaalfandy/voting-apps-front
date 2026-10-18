@@ -33,7 +33,7 @@ export function BallotPage() {
             <VoteReceipt vote={vote} />
           ) : (
             <QueryState query={settings} what="the ballot">
-              {({ locked }) => (locked ? <VotingClosed /> : <Ballot />)}
+              {({ locked }) => (locked ? <Ballot /> : <VotingNotStarted />)}
             </QueryState>
           )
         }
@@ -42,15 +42,15 @@ export function BallotPage() {
   );
 }
 
-function VotingClosed() {
+function VotingNotStarted() {
   return (
-    <section aria-labelledby="closed-heading" className={`p-5 sm:p-6 ${card}`}>
-      <h1 id="closed-heading" className="text-2xl font-bold text-ink-strong">
-        Voting is closed
+    <section aria-labelledby="not-started-heading" className={`p-5 sm:p-6 ${card}`}>
+      <h1 id="not-started-heading" className="text-2xl font-bold text-ink-strong">
+        Voting has not started
       </h1>
       <p className="mt-5 rounded-lg border border-warn-line bg-warn-wash p-4 text-warn-ink">
-        The election administrator has closed voting for now. Keep this page open; the ballot comes back as soon as
-        voting reopens.
+        The election administrator is still preparing the election. Keep this page open; the ballot appears as soon as
+        voting opens.
       </p>
     </section>
   );
