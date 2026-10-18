@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router';
 import { homePathFor, useAuth } from '../auth/AuthContext';
-import { Button, ErrorAlert, Field } from '../components/ui';
+import { Button, ErrorAlert, Field, card } from '../components/ui';
 
 export function LoginPage() {
   const { user, login } = useAuth();
@@ -31,11 +31,11 @@ export function LoginPage() {
   }
 
   return (
-    <div className="mx-auto max-w-sm pt-4 sm:pt-10">
-      <h1 className="text-2xl font-bold">Sign in</h1>
+    <div className={`mx-auto max-w-sm p-6 sm:mt-6 ${card}`}>
+      <h1 className="text-2xl font-bold text-ink-strong">Sign in</h1>
       <p className="mt-2 text-ink-muted">Voters see their ballot. Administrators see the election console.</p>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         {error && <ErrorAlert>{error}</ErrorAlert>}
         <Field
           label="Email"
