@@ -1,0 +1,113 @@
+@import 'tailwindcss';
+
+/* Slate neutrals + indigo primary come from the owner's mockup. Every text pair is WCAG AA in both themes. */
+:root {
+  --canvas: #f8fafc;
+  --surface: #ffffff;
+  --surface-muted: #f1f5f9;
+  --line: #e2e8f0;
+  --line-strong: #64748b;
+  --ink: #0f172a;
+  --ink-muted: #475569;
+  --primary: #4338ca;
+  --primary-hover: #3730a3;
+  --primary-soft: #eef2ff;
+  --on-primary: #ffffff;
+  --danger: #be123c;
+  --danger-strong: #9f1239;
+  --danger-soft: #fff1f2;
+  --warn: #92400e;
+  --warn-soft: #fffbeb;
+  --warn-line: #f59e0b;
+  --bar-track: #e2e8f0;
+  --bar-muted: #64748b;
+  --focus: #4f46e5;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: #020617;
+    --surface: #0f172a;
+    --surface-muted: #1e293b;
+    --line: #334155;
+    --line-strong: #94a3b8;
+    --ink: #f1f5f9;
+    --ink-muted: #94a3b8;
+    --primary: #818cf8;
+    --primary-hover: #a5b4fc;
+    --primary-soft: #1e1b4b;
+    --on-primary: #020617;
+    --danger: #fb7185;
+    --danger-strong: #fda4af;
+    --danger-soft: #4c0519;
+    --warn: #fcd34d;
+    --warn-soft: #451a03;
+    --warn-line: #b45309;
+    --bar-track: #1e293b;
+    --bar-muted: #94a3b8;
+    --focus: #a5b4fc;
+  }
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-on-primary: var(--on-primary);
+  --color-danger: var(--danger);
+  --color-danger-strong: var(--danger-strong);
+  --color-danger-soft: var(--danger-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-warn-line: var(--warn-line);
+  --color-bar-track: var(--bar-track);
+  --color-bar-muted: var(--bar-muted);
+  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  dialog::backdrop {
+    background: rgb(2 6 23 / 0.6);
+  }
+}
+
+@layer components {
+  /* Identity motif: the oval a voter fills in on a paper ballot. Native radio, so keyboard and screen readers work unchanged. */
+  .ballot-mark {
+    appearance: none;
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 1.25rem;
+    border: 2px solid var(--line-strong);
+    border-radius: 9999px;
+    background: var(--surface);
+    transition:
+      background-color 120ms,
+      border-color 120ms;
+  }
+
+  .ballot-mark:checked,
+  .ballot-mark[data-filled] {
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+}
