@@ -27,7 +27,7 @@ export function ResultsPage() {
               <p className="mt-2 text-ink-muted">
                 {data.participation.eligible === 0 ? (
                   <>
-                    No active voters yet. <Link to="../users" relative="path" className="font-semibold text-primary underline">Add voters</Link>
+                    No active voters yet. <Link to="/admin/users" className="font-semibold text-primary underline">Add voters</Link>
                   </>
                 ) : (
                   `${data.participation.voted} of ${plural(data.participation.eligible, 'eligible voter', 'eligible voters')} ${
@@ -50,7 +50,7 @@ export function ResultsPage() {
             </h2>
             {data.candidates.length === 0 ? (
               <p className="mt-3 text-ink-muted">
-                No candidates yet. <Link to="../candidates" relative="path" className="font-semibold text-primary underline">Add names</Link>{' '}
+                No candidates yet. <Link to="/admin/candidates" className="font-semibold text-primary underline">Add names</Link>{' '}
                 or wait for voters to write them in.
               </p>
             ) : (
