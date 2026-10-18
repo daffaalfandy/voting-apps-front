@@ -5,7 +5,7 @@ import type { Candidate } from '../../api/types';
 import { Dialog } from '../../components/Dialog';
 import { QueryState } from '../../components/QueryState';
 import { useToast } from '../../components/Toast';
-import { Button, ErrorAlert, Field, WriteInTag } from '../../components/ui';
+import { Button, ErrorAlert, Field, WriteInTag, card } from '../../components/ui';
 import { plural } from '../../lib/format';
 import { useAdminContext } from './AdminLayout';
 
@@ -57,9 +57,9 @@ export function CandidatesPage() {
   }
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[20rem_1fr]">
-      <section aria-labelledby="add-heading">
-        <h2 id="add-heading" className="text-lg font-bold">
+    <div className="grid gap-5 lg:grid-cols-[20rem_1fr]">
+      <section aria-labelledby="add-heading" className={`self-start p-5 ${card}`}>
+        <h2 id="add-heading" className="text-lg font-bold text-ink-strong">
           Add a name
         </h2>
         <form onSubmit={handleAdd} className="mt-4 space-y-4">
@@ -80,8 +80,8 @@ export function CandidatesPage() {
         </form>
       </section>
 
-      <section aria-labelledby="ballot-list-heading">
-        <h2 id="ballot-list-heading" className="text-lg font-bold">
+      <section aria-labelledby="ballot-list-heading" className={`p-5 ${card}`}>
+        <h2 id="ballot-list-heading" className="text-lg font-bold text-ink-strong">
           On the ballot
         </h2>
         <div className="mt-4">
@@ -90,11 +90,11 @@ export function CandidatesPage() {
               items.length === 0 ? (
                 <p className="text-ink-muted">No names on the ballot yet. Add the first one; voters can also write names in.</p>
               ) : (
-                <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
+                <ul className="divide-y divide-line-soft border-y border-line-soft">
                   {items.map((candidate) => (
-                    <li key={candidate.id} className="flex min-h-16 flex-wrap items-center justify-between gap-3 px-4 py-3">
+                    <li key={candidate.id} className="flex min-h-16 flex-wrap items-center justify-between gap-3 py-3">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-semibold">{candidate.name}</span>
+                        <span className="font-bold text-ink-strong">{candidate.name}</span>
                         {candidate.isWriteIn && <WriteInTag />}
                         <span className="text-sm text-ink-muted">{plural(candidate.voteCount ?? 0, 'vote', 'votes')}</span>
                       </div>
