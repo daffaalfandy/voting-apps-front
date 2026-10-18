@@ -1,14 +1,23 @@
-import { useState, type FormEvent } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router';
+import { useState, type FormEvent, type ReactNode } from 'react';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router';
+import type { User } from '../api/types';
 import { homePathFor, useAuth } from '../auth/AuthContext';
 import { Button, ErrorAlert, Field, card } from '../components/ui';
 
-export function LoginPage() {
-  const { user, login } = useAuth();
+interface SignInCardProps {
+  title: string;
+  intro: string;
+  secretField: { label: string; type: 'text' | 'password'; autoComplete: string; hint?: string };
+  signIn(email: string, secret: string): Promise<User>;
+  footer: ReactNode;
+}
+
+function SignInCard({ title, intro, secretField, signIn, footer }: SignInCardProps) {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [secret, setSecret] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -21,7 +30,7 @@ export function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      const signedIn = await login(email, password);
+      const signedIn = await signIn(email, secret);
       const from = (location.state as { from?: string } | null)?.from;
       navigate(from ?? homePathFor(signedIn), { replace: true });
     } catch (err) {
@@ -31,32 +40,84 @@ export function LoginPage() {
   }
 
   return (
-    <div className={`mx-auto max-w-sm p-6 sm:mt-6 ${card}`}>
-      <h1 className="text-2xl font-bold text-ink-strong">Sign in</h1>
-      <p className="mt-2 text-ink-muted">Voters see their ballot. Administrators see the election console.</p>
+    <div className="mx-auto max-w-sm space-y-4 sm:mt-6">
+      <div className={`p-6 ${card}`}>
+        <h1 className="text-2xl font-bold text-ink-strong">{title}</h1>
+        <p className="mt-2 text-ink-muted">{intro}</p>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-        {error && <ErrorAlert>{error}</ErrorAlert>}
-        <Field
-          label="Email"
-          type="email"
-          autoComplete="username"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <Field
-          label="Password"
-          type="password"
-          autoComplete="current-password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button type="submit" variant="primary" className="w-full" disabled={submitting}>
-          {submitting ? 'Signing in…' : 'Sign in'}
-        </Button>
-      </form>
+        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+          {error && <ErrorAlert>{error}</ErrorAlert>}
+          <Field
+            label="Email"
+            type="email"
+            autoComplete="username"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Field
+            label={secretField.label}
+            type={secretField.type}
+            autoComplete={secretField.autoComplete}
+            hint={secretField.hint}
+            required
+            spellCheck={false}
+            value={secret}
+            onChange={(e) => setSecret(e.target.value)}
+          />
+          <Button type="submit" variant="primary" className="w-full" disabled={submitting}>
+            {submitting ? 'Signing in…' : 'Sign in'}
+          </Button>
+        </form>
+      </div>
+      <p className="text-center text-sm text-ink-muted">{footer}</p>
     </div>
+  );
+}
+
+const footerLink = 'inline-flex min-h-11 items-center font-bold text-primary underline';
+
+export function VoterLoginPage() {
+  const { voterLogin } = useAuth();
+  return (
+    <SignInCard
+      title="Sign in to vote"
+      intro="Use the email address and vote code you received from the election administrator."
+      secretField={{
+        label: 'Vote code',
+        type: 'text',
+        autoComplete: 'off',
+        hint: 'Eight letters and numbers, like ABCD-2345. Capitals and the dash are optional.',
+      }}
+      signIn={voterLogin}
+      footer={
+        <>
+          Running the election?{' '}
+          <Link to="/admin/login" className={footerLink}>
+            Administrator sign in
+          </Link>
+        </>
+      }
+    />
+  );
+}
+
+export function AdminLoginPage() {
+  const { adminLogin } = useAuth();
+  return (
+    <SignInCard
+      title="Administrator sign in"
+      intro="For election staff who manage voters, candidates and the count."
+      secretField={{ label: 'Password', type: 'password', autoComplete: 'current-password' }}
+      signIn={adminLogin}
+      footer={
+        <>
+          Here to vote?{' '}
+          <Link to="/login" className={footerLink}>
+            Voter sign in
+          </Link>
+        </>
+      }
+    />
   );
 }
