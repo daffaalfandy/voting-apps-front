@@ -132,7 +132,7 @@ function Ballot() {
               ))}
 
               <div className="rounded-md border border-line bg-surface px-4 py-3 has-checked:border-primary has-checked:bg-primary-soft">
-                <label className="flex min-h-8 cursor-pointer items-center gap-4">
+                <label className="flex min-h-11 cursor-pointer items-center gap-4">
                   <input
                     type="radio"
                     name="choice"

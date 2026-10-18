@@ -106,7 +106,7 @@ export function UsersPage() {
                 type="button"
                 aria-pressed={filter === option.value}
                 onClick={() => setFilter(option.value)}
-                className={`min-h-10 rounded px-3 text-sm font-semibold transition-colors ${
+                className={`min-h-11 rounded px-3 text-sm font-semibold transition-colors ${
                   filter === option.value ? 'bg-ink text-canvas' : 'text-ink hover:bg-surface-muted'
                 }`}
               >

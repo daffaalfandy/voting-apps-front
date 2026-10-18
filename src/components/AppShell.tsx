@@ -24,7 +24,7 @@ export function AppShell() {
       </a>
       <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
-          <Link to="/" className="rounded-md">
+          <Link to="/" className="inline-flex min-h-11 items-center rounded-md">
             <Wordmark />
           </Link>
           {user && (
