@@ -6,7 +6,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { Dialog } from '../../components/Dialog';
 import { QueryState } from '../../components/QueryState';
 import { useToast } from '../../components/Toast';
-import { Button, ErrorAlert } from '../../components/ui';
+import { Badge, Button, ErrorAlert, card } from '../../components/ui';
 import { formatDateTime } from '../../lib/format';
 import { useDebouncedValue } from '../../lib/useDebouncedValue';
 import { useAdminContext } from './AdminLayout';
@@ -85,9 +85,9 @@ export function UsersPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+      <div className={`flex flex-col gap-3 p-4 lg:flex-row lg:items-end ${card}`}>
         <div className="flex-1 space-y-1.5">
-          <label htmlFor="user-search" className="block text-sm font-semibold">
+          <label htmlFor="user-search" className="block text-sm font-bold text-ink">
             Search by name or email
           </label>
           <input
@@ -95,19 +95,19 @@ export function UsersPage() {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="block min-h-11 w-full rounded-md border border-line-strong bg-surface px-3 text-base text-ink"
+            className="block min-h-11 w-full rounded-lg border border-line-strong bg-surface px-3 text-base text-ink"
           />
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div role="group" aria-label="Filter by voting status" className="flex rounded-md border border-line-strong p-0.5">
+          <div role="group" aria-label="Filter by voting status" className="flex gap-1">
             {FILTERS.map((option) => (
               <button
                 key={option.value}
                 type="button"
                 aria-pressed={filter === option.value}
                 onClick={() => setFilter(option.value)}
-                className={`min-h-11 rounded px-3 text-sm font-semibold transition-colors ${
-                  filter === option.value ? 'bg-ink text-canvas' : 'text-ink hover:bg-surface-muted'
+                className={`min-h-11 rounded-lg px-3.5 text-sm font-bold transition-colors ${
+                  filter === option.value ? 'bg-ink-strong text-header-ink' : 'bg-surface-muted text-ink hover:bg-line-soft'
                 }`}
               >
                 {option.label}
@@ -125,7 +125,7 @@ export function UsersPage() {
       <QueryState query={users} what="users">
         {(items) =>
           items.length === 0 ? (
-            <div className="space-y-3 rounded-lg border border-dashed border-line-strong p-6 text-center">
+            <div className="space-y-3 rounded-xl border border-dashed border-line-strong bg-surface p-6 text-center">
               <p className="text-ink-muted">
                 {query ? `No users match “${query}”` : 'No users match this filter'}
                 {filter !== 'all' && query ? ' with this filter' : ''}.
@@ -133,27 +133,27 @@ export function UsersPage() {
               <Button onClick={clearFilters}>Clear search and filter</Button>
             </div>
           ) : (
-            <ul className="divide-y divide-line rounded-lg border border-line bg-surface" aria-busy={users.isFetching}>
+            <ul className={`divide-y divide-line-soft overflow-hidden ${card}`} aria-busy={users.isFetching}>
               {items.map((user) => {
                 const isSelf = user.id === me?.id;
                 return (
                   <li key={user.id} className="flex flex-col gap-3 px-4 py-4 md:flex-row md:items-center md:justify-between">
                     <div className="min-w-0">
-                      <p className="font-semibold">
+                      <p className="font-bold text-ink-strong">
                         {user.name}
                         {isSelf && <span className="font-normal text-ink-muted"> (you)</span>}
                       </p>
                       <p className="truncate text-sm text-ink-muted">{user.email}</p>
-                      <p className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm">
-                        <span>{user.role === 'admin' ? 'Administrator' : 'Voter'}</span>
-                        {user.status === 'suspended' && <span className="font-semibold text-danger">Suspended</span>}
-                        <span className="text-ink-muted">
-                          {user.role === 'admin'
-                            ? 'Does not vote'
-                            : user.hasVoted && user.votedAt
-                              ? `Voted ${formatDateTime(user.votedAt)}`
-                              : 'Not voted yet'}
-                        </span>
+                      <p className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                        <Badge tone="neutral">{user.role === 'admin' ? 'Administrator' : 'Voter'}</Badge>
+                        {user.status === 'suspended' ? <Badge tone="danger">Suspended</Badge> : <Badge tone="success">Active</Badge>}
+                        {user.role === 'admin' ? (
+                          <span className="text-ink-muted">Does not vote</span>
+                        ) : user.hasVoted && user.votedAt ? (
+                          <span className="font-bold text-success-text">Voted {formatDateTime(user.votedAt)}</span>
+                        ) : (
+                          <span className="text-ink-muted">Not voted yet</span>
+                        )}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -161,7 +161,12 @@ export function UsersPage() {
                         Edit
                       </Button>
                       {user.hasVoted && (
-                        <Button disabled={blocked} onClick={() => ask('reset', user)} aria-label={`Reset vote for ${user.name}`}>
+                        <Button
+                          variant="warn"
+                          disabled={blocked}
+                          onClick={() => ask('reset', user)}
+                          aria-label={`Reset vote for ${user.name}`}
+                        >
                           Reset vote
                         </Button>
                       )}
