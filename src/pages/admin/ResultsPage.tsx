@@ -5,6 +5,7 @@ import type { Participant, Results, Standing } from '../../api/types';
 import { QueryState } from '../../components/QueryState';
 import { Badge, Button, WriteInTag, card } from '../../components/ui';
 import { formatDateTime, formatTime, percent, plural } from '../../lib/format';
+import { ResetElection } from './ResetElection';
 
 export function ResultsPage() {
   const queryClient = useQueryClient();
@@ -73,6 +74,8 @@ export function ResultsPage() {
           </section>
 
           <ParticipationLedger />
+
+          <ResetElection results={data} />
         </div>
       )}
     </QueryState>
