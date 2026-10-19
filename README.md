@@ -58,7 +58,7 @@ The lock button in the console is the election switch. Unlocked means preparing:
 
 ```
 src/
-  api/          fetch wrapper and response types
+  api/          fetch wrapper, token store, API errors
   auth/         session context, role guard
   components/   app shell, dialog, toast, loading/error wrapper, form controls
   pages/        login, ballot, not found
