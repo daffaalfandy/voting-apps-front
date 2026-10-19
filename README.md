@@ -110,6 +110,16 @@ The administrator tabs are nested under `AdminLayout`, which loads the lock stat
 
 `api()` turns any failed response into an `ApiError` with the HTTP status and the most useful message: the first validation detail if there is one, otherwise the API's own message. A network failure becomes status 0 with "Could not reach the server". Queries show the message through `QueryState`; mutations show it in an `ErrorAlert` next to the form or button that caused it.
 
+## Why it is structured this way
+
+- **The server is the source of truth.** There is no client-side store of users, votes or candidates. The query cache is the only copy, keyed by request, and every change goes to the API first and then refreshes from it. The client never adds up totals or decides on its own whether someone may vote.
+- **One door to the API.** Every request goes through `api()` in `src/api/client.js`, so the base path, the token, JSON handling, error messages and signing out on 401 live in one small file instead of in every page.
+- **Context only for what is truly global.** React context holds the session and the toast, the two things every screen needs. Everything else is either server data, which belongs in the query cache, or form state, which belongs in the component that owns the form.
+- **Pages own their data.** Each page declares its queries and mutations next to the markup that uses them, so a screen reads top to bottom: what it loads, what it changes, what it renders. Pages that affect each other share cache keys instead of calling each other.
+- **Components only render.** Nothing in `components/` fetches data. Buttons, fields, the dialog, the toast and `QueryState` take props and render, so any page can use them without pulling in data it does not need.
+- **One origin.** The app only calls relative `/api` paths. In development Vite proxies them to port 4000; in Docker nginx proxies them to `API_UPSTREAM`. The built files contain no API address, the API needs no CORS setup, and the same image works against any backend.
+- **A static build.** `npm run build` produces plain HTML, CSS and JavaScript. nginx caches the hashed files under `/assets` for a year, always revalidates `index.html` so a new release shows up on the next load, and answers any unknown path with `index.html` so deep links and reloads work.
+
 ## Layout
 
 ```
