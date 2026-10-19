@@ -54,6 +54,62 @@ The lock button in the console is the election switch. Unlocked means preparing:
 - Interactive controls are at least 44px tall and show a visible focus ring.
 - The session token is kept in `localStorage` to survive reloads. That keeps the app simple, at the cost of being readable by any script that runs on the page; an httpOnly cookie would be the next step for a public deployment.
 
+## How the code works
+
+### Startup
+
+`main.jsx` creates one TanStack Query client and wraps the app in three providers, outermost first:
+
+1. `QueryClientProvider`: the cache for everything fetched from the API.
+2. `AuthProvider` (`auth/AuthContext.jsx`): the signed-in user, and the sign-in and sign-out actions.
+3. `ToastProvider`: short confirmations such as "Vote recorded".
+
+If a token was saved on an earlier visit, `AuthProvider` asks `GET /auth/me` who it belongs to, and the app shows "Restoring your session…" until the answer arrives. Only then does the router render, so reloading `/admin/users` stays on that page instead of bouncing through the sign-in screen.
+
+Failed queries are retried up to twice, except 4xx responses: a 403 or a 404 will not change on a second try.
+
+### Data flow
+
+```
+page component
+  → useQuery / useMutation       TanStack Query: cache, loading and error state
+  → api(path, options)           src/api/client.js: token, JSON, errors
+  → fetch('/api/...')
+  → Vite dev proxy or nginx      same origin as the page
+  → voting-apps-back
+```
+
+- **Reading.** A page asks for data with `useQuery` and a key. The answer is cached under that key, and every component that uses the same key shares it. `QueryState` turns a query into a loading line, an error box with a retry button, or the content.
+- **Writing.** Forms and buttons call `useMutation`. On success the mutation either writes the server's answer straight into the cache (`setQueryData`) or marks related keys as stale (`invalidateQueries`), and any screen showing them fetches again. That is how adding a user also updates turnout on the results tab, without the two pages knowing about each other.
+- **Staying current.** Results and the participation list refetch every 10 seconds. The voter's lock state refetches every 15 seconds, so the ballot appears on its own once the administrator starts the election. Typing in the user search waits 250 ms before it changes the query, and the previous list stays on screen while the new one loads.
+- **When the server disagrees.** If a vote comes back 409 (already voted) or 423 (voting not open), the ballot refetches the data involved instead of guessing, and the screen moves to whatever the server says is true.
+
+| Query key | Endpoint | Used by | Refreshed |
+|---|---|---|---|
+| `['settings']` | `GET /settings` | ballot, admin console | every 15 s on the ballot; set directly after locking or unlocking |
+| `['myVote']` | `GET /votes/me` | ballot | set directly after voting; refetched on 409 |
+| `['candidates']` | `GET /candidates` | ballot, candidates tab | after a vote, a candidate change or a reset |
+| `['results']` | `GET /results` | results tab | every 10 s; after any user or candidate change, or a reset |
+| `['participation']` | `GET /participation` | results tab | every 10 s; after user changes, a reset, or Refresh |
+| `['users', search, filter]` | `GET /users` | users tab | after any user change or a reset |
+
+### Session
+
+- `tokenStore` in `api/client.js` keeps the token in `localStorage`, and `api()` sends it as `Authorization: Bearer ...` with every request.
+- Signing in posts to `/auth/login` or `/auth/admin/login`, saves the token and puts the returned user into `AuthProvider`.
+- If a request comes back 401 while a token is set, the token has expired or the account is gone. `api()` calls the handler that `AuthProvider` registered, which clears the token, the user and the whole query cache, and the route guards send the person to sign in.
+- Signing out does the same, so the next person on a shared computer starts with an empty cache.
+
+### Routing and access
+
+`router.jsx` lists every route. They all render inside `AppShell` (header, skip link, main area). `RequireRole` wraps the voter and administrator areas: without a user it redirects to the right sign-in page and remembers where the person was going; with the wrong role it redirects to that user's own start page. These guards only decide what to show. The API checks every request on its own.
+
+The administrator tabs are nested under `AdminLayout`, which loads the lock state once, shows the lock switch and its banner, and hands `locked` to the tabs through the router's outlet context (`useAdminContext()`). A tab disables every control that would change users or candidates unless `locked` is exactly `false`, so while the state is loading, or failed to load, nothing can be edited.
+
+### Errors
+
+`api()` turns any failed response into an `ApiError` with the HTTP status and the most useful message: the first validation detail if there is one, otherwise the API's own message. A network failure becomes status 0 with "Could not reach the server". Queries show the message through `QueryState`; mutations show it in an `ErrorAlert` next to the form or button that caused it.
+
 ## Layout
 
 ```
