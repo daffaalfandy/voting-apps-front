@@ -1,14 +1,14 @@
 const TOKEN_KEY = 'voting-app.token';
 
 export const tokenStore = {
-  get(): string | null {
+  get() {
     try {
       return localStorage.getItem(TOKEN_KEY);
     } catch {
       return null;
     }
   },
-  set(token: string) {
+  set(token) {
     try {
       localStorage.setItem(TOKEN_KEY, token);
     } catch {
@@ -25,31 +25,25 @@ export const tokenStore = {
 };
 
 export class ApiError extends Error {
-  constructor(
-    public readonly status: number,
-    message: string,
-  ) {
+  constructor(status, message) {
     super(message);
+    this.status = status;
   }
 }
 
-let onUnauthorized: () => void = () => {};
+let onUnauthorized = () => {};
 
-export function setUnauthorizedHandler(handler: () => void) {
+export function setUnauthorizedHandler(handler) {
   onUnauthorized = handler;
 }
 
-interface ErrorBody {
-  error?: { message?: string; details?: { message: string }[] };
-}
-
-export async function api<T>(path: string, options: { method?: string; body?: unknown } = {}): Promise<T> {
+export async function api(path, options = {}) {
   const token = tokenStore.get();
-  const headers: Record<string, string> = {};
+  const headers = {};
   if (options.body !== undefined) headers['Content-Type'] = 'application/json';
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  let res: Response;
+  let res;
   try {
     res = await fetch(`/api${path}`, {
       method: options.method ?? 'GET',
@@ -61,17 +55,16 @@ export async function api<T>(path: string, options: { method?: string; body?: un
   }
 
   if (res.status === 204) {
-    return undefined as T;
+    return undefined;
   }
 
-  const data: unknown = await res.json().catch(() => null);
+  const data = await res.json().catch(() => null);
   if (!res.ok) {
     if (res.status === 401 && token) {
       onUnauthorized();
     }
-    const body = data as ErrorBody | null;
-    const message = body?.error?.details?.[0]?.message ?? body?.error?.message ?? `Request failed (${res.status})`;
+    const message = data?.error?.details?.[0]?.message ?? data?.error?.message ?? `Request failed (${res.status})`;
     throw new ApiError(res.status, message);
   }
-  return data as T;
+  return data;
 }
