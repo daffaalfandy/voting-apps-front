@@ -2,7 +2,7 @@
 
 Web client for the voting application: a one-screen ballot for voters and an election console for administrators.
 
-React 19, Vite, TypeScript, Tailwind CSS 4, React Router and TanStack Query. It talks to the API in [`voting-apps-back`](../voting-apps-back).
+React 19 (JavaScript and JSX), Vite, Tailwind CSS 4, React Router and TanStack Query. It talks to the API in [`voting-apps-back`](../voting-apps-back).
 
 ## Run it
 
