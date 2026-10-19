@@ -14,7 +14,7 @@ The only requirement is Docker with Compose v2.
 docker compose up --build
 ```
 
-Voters open http://localhost:3000; administrators open http://localhost:3000/admin/login. The seeded accounts and vote codes are listed in the backend README.
+Voters open http://localhost:3000. Administrators open http://localhost:3000/admin/login. The seeded accounts and vote codes are listed in the backend README.
 
 **On its own**, pointing at an API that is already running:
 
@@ -40,19 +40,19 @@ npm run dev    # http://localhost:5173, /api is proxied to http://localhost:4000
 | `/admin/login` | administrators | Email and password, on a page of its own. |
 | `/vote` | voters | Pick a name or write one in, confirm, then see what was recorded. Typing a name that is already listed says so before submitting. Until the system is locked it shows "Voting has not started" instead, and the ballot appears on its own once voting opens. |
 | `/admin/results` | administrators | Votes cast, turnout, standings, and the voter participation list (who voted and when, never how). Refreshes every 10 seconds. Also holds "Reset the election". |
-| `/admin/candidates` | administrators | Add names; remove names that have no votes. |
-| `/admin/users` | administrators | Search, filter by voted / not voted, add, edit, suspend, reset a vote, delete. Adding a voter shows their vote code once; Edit can issue a new one if it is lost. |
+| `/admin/candidates` | administrators | Add names. Remove names that have no votes. |
+| `/admin/users` | administrators | Search, filter by voted / not voted, add, edit, suspend, reset a vote, delete. Adding a voter shows their vote code once. Edit can issue a new one if it is lost. |
 
 The lock button in the console is the election switch. Unlocked means preparing: users and candidates can change and voting has not started. Locked means the election is running: voters can vote, and controls that would change users or candidates are disabled, with a banner saying why. Resetting the election (every vote and write-in name deleted, voters and listed names kept) only works while unlocked, and asks you to type RESET to confirm.
 
 ## Design notes
 
-- Colours and the Plus Jakarta Sans typeface come from the original mockup: a slate-950 header, slate surfaces, indigo for actions and selection, and status colours that mean the same thing everywhere (emerald for leading, voted and active; amber for write-ins and the lock; rose for errors, suspension and deletion). They are CSS variables in `src/index.css`. The app is light only. Every text colour pair meets WCAG AA.
+- Colours and the Plus Jakarta Sans typeface come from the original mockup: a slate-950 header, slate surfaces, indigo for actions and selection, and status colours that mean the same thing everywhere. Emerald marks leading, voted and active. Amber marks write-ins and the lock. Rose marks errors, suspension and deletion. They are CSS variables in `src/index.css`. The app is light only. Every text colour pair meets WCAG AA.
 - The radio buttons are drawn as the oval you fill in on a paper ballot. The same filled oval sits in the wordmark and on the voter's receipt.
 - Dialogs use the native `<dialog>` element, so Escape, focus trapping and returning focus work without extra code. Radio groups are native inputs, so arrow keys work.
 - Every data view has a loading state, an error state with a retry button, and an empty state that says what to do next.
 - Interactive controls are at least 44px tall and show a visible focus ring.
-- The session token is kept in `localStorage` to survive reloads. That keeps the app simple, at the cost of being readable by any script that runs on the page; an httpOnly cookie would be the next step for a public deployment.
+- The session token is kept in `localStorage` to survive reloads. That keeps the app simple, at the cost of being readable by any script that runs on the page. An httpOnly cookie would be the next step for a public deployment.
 
 ## How the code works
 
@@ -86,12 +86,12 @@ page component
 
 | Query key | Endpoint | Used by | Refreshed |
 |---|---|---|---|
-| `['settings']` | `GET /settings` | ballot, admin console | every 15 s on the ballot; set directly after locking or unlocking |
-| `['myVote']` | `GET /votes/me` | ballot | set directly after voting; refetched on 409 |
-| `['candidates']` | `GET /candidates` | ballot, candidates tab | after a vote, a candidate change or a reset |
-| `['results']` | `GET /results` | results tab | every 10 s; after any user or candidate change, or a reset |
-| `['participation']` | `GET /participation` | results tab | every 10 s; after user changes, a reset, or Refresh |
-| `['users', search, filter]` | `GET /users` | users tab | after any user change or a reset |
+| `['settings']` | `GET /settings` | ballot, admin console | Every 15 s on the ballot. Set directly after locking or unlocking. |
+| `['myVote']` | `GET /votes/me` | ballot | Set directly after voting. Refetched on 409. |
+| `['candidates']` | `GET /candidates` | ballot, candidates tab | After a vote, a candidate change or a reset. |
+| `['results']` | `GET /results` | results tab | Every 10 s. After any user or candidate change, or a reset. |
+| `['participation']` | `GET /participation` | results tab | Every 10 s. After user changes, a reset, or Refresh. |
+| `['users', search, filter]` | `GET /users` | users tab | After any user change or a reset. |
 
 ### Session
 
@@ -102,13 +102,13 @@ page component
 
 ### Routing and access
 
-`router.jsx` lists every route. They all render inside `AppShell` (header, skip link, main area). `RequireRole` wraps the voter and administrator areas: without a user it redirects to the right sign-in page and remembers where the person was going; with the wrong role it redirects to that user's own start page. These guards only decide what to show. The API checks every request on its own.
+`router.jsx` lists every route. They all render inside `AppShell` (header, skip link, main area). `RequireRole` wraps the voter and administrator areas: without a user it redirects to the right sign-in page and remembers where the person was going. With the wrong role it redirects to that user's own start page. These guards only decide what to show. The API checks every request on its own.
 
 The administrator tabs are nested under `AdminLayout`, which loads the lock state once, shows the lock switch and its banner, and hands `locked` to the tabs through the router's outlet context (`useAdminContext()`). A tab disables every control that would change users or candidates unless `locked` is exactly `false`, so while the state is loading, or failed to load, nothing can be edited.
 
 ### Errors
 
-`api()` turns any failed response into an `ApiError` with the HTTP status and the most useful message: the first validation detail if there is one, otherwise the API's own message. A network failure becomes status 0 with "Could not reach the server". Queries show the message through `QueryState`; mutations show it in an `ErrorAlert` next to the form or button that caused it.
+`api()` turns any failed response into an `ApiError` with the HTTP status and the most useful message: the first validation detail if there is one, otherwise the API's own message. A network failure becomes status 0 with "Could not reach the server". Queries show the message through `QueryState`. Mutations show it in an `ErrorAlert` next to the form or button that caused it.
 
 ## Why it is structured this way
 
@@ -117,7 +117,7 @@ The administrator tabs are nested under `AdminLayout`, which loads the lock stat
 - **Context only for what is truly global.** React context holds the session and the toast, the two things every screen needs. Everything else is either server data, which belongs in the query cache, or form state, which belongs in the component that owns the form.
 - **Pages own their data.** Each page declares its queries and mutations next to the markup that uses them, so a screen reads top to bottom: what it loads, what it changes, what it renders. Pages that affect each other share cache keys instead of calling each other.
 - **Components only render.** Nothing in `components/` fetches data. Buttons, fields, the dialog, the toast and `QueryState` take props and render, so any page can use them without pulling in data it does not need.
-- **One origin.** The app only calls relative `/api` paths. In development Vite proxies them to port 4000; in Docker nginx proxies them to `API_UPSTREAM`. The built files contain no API address, the API needs no CORS setup, and the same image works against any backend.
+- **One origin.** The app only calls relative `/api` paths. In development Vite proxies them to port 4000. In Docker nginx proxies them to `API_UPSTREAM`. The built files contain no API address, the API needs no CORS setup, and the same image works against any backend.
 - **A static build.** `npm run build` produces plain HTML, CSS and JavaScript. nginx caches the hashed files under `/assets` for a year, always revalidates `index.html` so a new release shows up on the next load, and answers any unknown path with `index.html` so deep links and reloads work.
 
 ## Layout
