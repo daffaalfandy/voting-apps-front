@@ -1,9 +1,7 @@
-import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router';
-import type { Role } from '../api/types';
 import { homePathFor, useAuth } from './AuthContext';
 
-export function RequireRole({ role, children }: { role: Role; children: ReactNode }) {
+export function RequireRole({ role, children }) {
   const { user } = useAuth();
   const location = useLocation();
 
