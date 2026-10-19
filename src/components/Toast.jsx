@@ -1,12 +1,12 @@
-import { createContext, use, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, use, useCallback, useEffect, useRef, useState } from 'react';
 
-const ToastContext = createContext<(message: string) => void>(() => {});
+const ToastContext = createContext(() => {});
 
-export function ToastProvider({ children }: { children: ReactNode }) {
-  const [message, setMessage] = useState<string | null>(null);
-  const timer = useRef<number>(undefined);
+export function ToastProvider({ children }) {
+  const [message, setMessage] = useState(null);
+  const timer = useRef(undefined);
 
-  const notify = useCallback((text: string) => {
+  const notify = useCallback((text) => {
     window.clearTimeout(timer.current);
     setMessage(text);
     timer.current = window.setTimeout(() => setMessage(null), 4000);

@@ -1,14 +1,7 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef } from 'react';
 
-interface DialogProps {
-  open: boolean;
-  onClose(): void;
-  title: string;
-  children: ReactNode;
-}
-
-export function Dialog({ open, onClose, title, children }: DialogProps) {
-  const ref = useRef<HTMLDialogElement>(null);
+export function Dialog({ open, onClose, title, children }) {
+  const ref = useRef(null);
   const titleId = useId();
 
   useEffect(() => {

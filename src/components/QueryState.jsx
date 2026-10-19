@@ -1,14 +1,6 @@
-import type { UseQueryResult } from '@tanstack/react-query';
-import type { ReactNode } from 'react';
 import { Button } from './ui';
 
-interface QueryStateProps<T> {
-  query: UseQueryResult<T>;
-  what: string;
-  children(data: T): ReactNode;
-}
-
-export function QueryState<T>({ query, what, children }: QueryStateProps<T>) {
+export function QueryState({ query, what, children }) {
   if (query.isPending) {
     return (
       <p role="status" className="py-10 text-center text-ink-muted">
