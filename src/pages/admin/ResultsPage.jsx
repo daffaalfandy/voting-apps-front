@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router';
 import { api } from '../../api/client';
-import type { Participant, Results, Standing } from '../../api/types';
 import { QueryState } from '../../components/QueryState';
 import { Badge, Button, WriteInTag, card } from '../../components/ui';
 import { formatDateTime, formatTime, percent, plural } from '../../lib/format';
@@ -11,7 +10,7 @@ export function ResultsPage() {
   const queryClient = useQueryClient();
   const results = useQuery({
     queryKey: ['results'],
-    queryFn: () => api<Results>('/results'),
+    queryFn: () => api('/results'),
     refetchInterval: 10_000,
   });
 
@@ -85,7 +84,7 @@ export function ResultsPage() {
 function ParticipationLedger() {
   const participation = useQuery({
     queryKey: ['participation'],
-    queryFn: () => api<{ participants: Participant[] }>('/participation').then((res) => res.participants),
+    queryFn: () => api('/participation').then((res) => res.participants),
     refetchInterval: 10_000,
   });
 
@@ -149,13 +148,13 @@ function ParticipationLedger() {
   );
 }
 
-function barColour(candidate: Standing, isLeader: boolean) {
+function barColour(candidate, isLeader) {
   if (isLeader) return 'bg-success';
   if (candidate.isWriteIn) return 'bg-warn';
   return 'bg-primary';
 }
 
-function Standings({ data }: { data: Results }) {
+function Standings({ data }) {
   const topVotes = data.candidates[0]?.votes ?? 0;
   const leaders = topVotes > 0 ? data.candidates.filter((c) => c.votes === topVotes).length : 0;
 

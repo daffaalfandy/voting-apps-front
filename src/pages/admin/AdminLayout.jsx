@@ -1,15 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { NavLink, Outlet, useOutletContext } from 'react-router';
 import { api } from '../../api/client';
-import type { Settings } from '../../api/types';
 import { useToast } from '../../components/Toast';
 import { Badge, Button, ErrorAlert } from '../../components/ui';
 
-interface AdminContext {
-  locked: boolean | undefined;
-}
-
-export const useAdminContext = () => useOutletContext<AdminContext>();
+export const useAdminContext = () => useOutletContext();
 
 const tabs = [
   { to: 'results', label: 'Results' },
@@ -23,12 +18,11 @@ export function AdminLayout() {
 
   const settings = useQuery({
     queryKey: ['settings'],
-    queryFn: () => api<{ settings: Settings }>('/settings').then((res) => res.settings),
+    queryFn: () => api('/settings').then((res) => res.settings),
   });
 
   const toggleLock = useMutation({
-    mutationFn: (locked: boolean) =>
-      api<{ settings: Settings }>('/settings', { method: 'PUT', body: { locked } }).then((res) => res.settings),
+    mutationFn: (locked) => api('/settings', { method: 'PUT', body: { locked } }).then((res) => res.settings),
     onSuccess: (next) => {
       queryClient.setQueryData(['settings'], next);
       notify(next.locked ? 'System locked: voting is open' : 'System unlocked: voting is closed');
@@ -100,7 +94,7 @@ export function AdminLayout() {
       </nav>
 
       <div className="pt-5">
-        <Outlet context={{ locked } satisfies AdminContext} />
+        <Outlet context={{ locked }} />
       </div>
     </div>
   );

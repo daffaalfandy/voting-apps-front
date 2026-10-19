@@ -1,19 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { api } from '../../api/client';
-import type { Role, User } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { Dialog } from '../../components/Dialog';
 import { useToast } from '../../components/Toast';
 import { Button, ErrorAlert, Field, SelectField } from '../../components/ui';
 
-interface UserFormDialogProps {
-  open: boolean;
-  user: User | null;
-  onClose(): void;
-}
-
-function VoteCodeReveal({ code, name }: { code: string; name: string }) {
+function VoteCodeReveal({ code, name }) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -40,15 +33,15 @@ function VoteCodeReveal({ code, name }: { code: string; name: string }) {
   );
 }
 
-export function UserFormDialog({ open, user, onClose }: UserFormDialogProps) {
+export function UserFormDialog({ open, user, onClose }) {
   const queryClient = useQueryClient();
   const notify = useToast();
   const { user: me, refreshUser } = useAuth();
   const [name, setName] = useState(user?.name ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<Role>(user?.role ?? 'voter');
-  const [issuedCode, setIssuedCode] = useState<{ code: string; name: string } | null>(null);
+  const [role, setRole] = useState(user?.role ?? 'voter');
+  const [issuedCode, setIssuedCode] = useState(null);
 
   const isSelf = user !== null && user.id === me?.id;
   const needsPassword = user ? user.role === 'admin' : role === 'admin';
@@ -63,11 +56,11 @@ export function UserFormDialog({ open, user, onClose }: UserFormDialogProps) {
     mutationFn: () => {
       if (!user) {
         const body = role === 'admin' ? { name, email, role, password } : { name, email, role };
-        return api<{ user: User; voteCode?: string }>('/users', { method: 'POST', body });
+        return api('/users', { method: 'POST', body });
       }
-      const changes: Record<string, string> = { name, email };
+      const changes = { name, email };
       if (password) changes.password = password;
-      return api<{ user: User; voteCode?: string }>(`/users/${user.id}`, { method: 'PATCH', body: changes });
+      return api(`/users/${user.id}`, { method: 'PATCH', body: changes });
     },
     onSuccess: ({ user: saved, voteCode }) => {
       refresh();
@@ -82,11 +75,11 @@ export function UserFormDialog({ open, user, onClose }: UserFormDialogProps) {
   });
 
   const reissue = useMutation({
-    mutationFn: (target: User) => api<{ voteCode: string }>(`/users/${target.id}/vote-code`, { method: 'POST' }),
+    mutationFn: (target) => api(`/users/${target.id}/vote-code`, { method: 'POST' }),
     onSuccess: ({ voteCode }, target) => setIssuedCode({ code: voteCode, name: target.name }),
   });
 
-  function handleSubmit(event: FormEvent) {
+  function handleSubmit(event) {
     event.preventDefault();
     save.mutate();
   }
@@ -121,7 +114,7 @@ export function UserFormDialog({ open, user, onClose }: UserFormDialogProps) {
           <SelectField
             label="Role"
             value={role}
-            onChange={(e) => setRole(e.target.value as Role)}
+            onChange={(e) => setRole(e.target.value)}
             hint={
               role === 'voter'
                 ? 'A vote code is generated when you save. Voters sign in with their email and that code.'

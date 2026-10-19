@@ -1,7 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { api } from '../../api/client';
-import type { User, UserStatus } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { Dialog } from '../../components/Dialog';
 import { QueryState } from '../../components/QueryState';
@@ -12,15 +11,11 @@ import { useDebouncedValue } from '../../lib/useDebouncedValue';
 import { useAdminContext } from './AdminLayout';
 import { UserFormDialog } from './UserFormDialog';
 
-type Filter = 'all' | 'voted' | 'not-voted';
-
-const FILTERS: { value: Filter; label: string }[] = [
+const FILTERS = [
   { value: 'all', label: 'All' },
   { value: 'voted', label: 'Voted' },
   { value: 'not-voted', label: 'Not voted' },
 ];
-
-type Confirmation = { kind: 'delete' | 'reset'; user: User };
 
 export function UsersPage() {
   const { locked } = useAdminContext();
@@ -30,11 +25,11 @@ export function UsersPage() {
   const notify = useToast();
 
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<Filter>('all');
+  const [filter, setFilter] = useState('all');
   const query = useDebouncedValue(search.trim(), 250);
-  const [editing, setEditing] = useState<User | 'new' | null>(null);
-  const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(null);
+  const [confirmation, setConfirmation] = useState(null);
+  const [actionError, setActionError] = useState(null);
 
   const users = useQuery({
     queryKey: ['users', query, filter],
@@ -42,7 +37,7 @@ export function UsersPage() {
       const params = new URLSearchParams();
       if (query) params.set('search', query);
       if (filter !== 'all') params.set('voted', String(filter === 'voted'));
-      return api<{ users: User[] }>(`/users?${params}`).then((res) => res.users);
+      return api(`/users?${params}`).then((res) => res.users);
     },
     placeholderData: keepPreviousData,
   });
@@ -54,8 +49,7 @@ export function UsersPage() {
   };
 
   const setStatus = useMutation({
-    mutationFn: ({ user, status }: { user: User; status: UserStatus }) =>
-      api<{ user: User }>(`/users/${user.id}`, { method: 'PATCH', body: { status } }),
+    mutationFn: ({ user, status }) => api(`/users/${user.id}`, { method: 'PATCH', body: { status } }),
     onMutate: () => setActionError(null),
     onSuccess: ({ user }) => {
       refresh();
@@ -65,8 +59,7 @@ export function UsersPage() {
   });
 
   const confirm = useMutation({
-    mutationFn: ({ kind, user }: Confirmation) =>
-      api<void>(kind === 'delete' ? `/users/${user.id}` : `/users/${user.id}/vote`, { method: 'DELETE' }),
+    mutationFn: ({ kind, user }) => api(kind === 'delete' ? `/users/${user.id}` : `/users/${user.id}/vote`, { method: 'DELETE' }),
     onSuccess: (_data, { kind, user }) => {
       setConfirmation(null);
       refresh();
@@ -74,7 +67,7 @@ export function UsersPage() {
     },
   });
 
-  function ask(kind: Confirmation['kind'], user: User) {
+  function ask(kind, user) {
     confirm.reset();
     setConfirmation({ kind, user });
   }

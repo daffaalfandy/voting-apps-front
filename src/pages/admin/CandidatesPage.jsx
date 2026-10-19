@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { api } from '../../api/client';
-import type { Candidate } from '../../api/types';
 import { Dialog } from '../../components/Dialog';
 import { QueryState } from '../../components/QueryState';
 import { useToast } from '../../components/Toast';
@@ -15,11 +14,11 @@ export function CandidatesPage() {
   const queryClient = useQueryClient();
   const notify = useToast();
   const [name, setName] = useState('');
-  const [pendingDelete, setPendingDelete] = useState<Candidate | null>(null);
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   const candidates = useQuery({
     queryKey: ['candidates'],
-    queryFn: () => api<{ candidates: Candidate[] }>('/candidates').then((res) => res.candidates),
+    queryFn: () => api('/candidates').then((res) => res.candidates),
   });
 
   const refresh = () => {
@@ -28,8 +27,7 @@ export function CandidatesPage() {
   };
 
   const add = useMutation({
-    mutationFn: (candidateName: string) =>
-      api<{ candidate: Candidate }>('/candidates', { method: 'POST', body: { name: candidateName } }),
+    mutationFn: (candidateName) => api('/candidates', { method: 'POST', body: { name: candidateName } }),
     onSuccess: ({ candidate }) => {
       setName('');
       refresh();
@@ -38,7 +36,7 @@ export function CandidatesPage() {
   });
 
   const remove = useMutation({
-    mutationFn: (candidate: Candidate) => api<void>(`/candidates/${candidate.id}`, { method: 'DELETE' }),
+    mutationFn: (candidate) => api(`/candidates/${candidate.id}`, { method: 'DELETE' }),
     onSuccess: (_data, candidate) => {
       setPendingDelete(null);
       refresh();
@@ -46,12 +44,12 @@ export function CandidatesPage() {
     },
   });
 
-  function handleAdd(event: FormEvent) {
+  function handleAdd(event) {
     event.preventDefault();
     add.mutate(name);
   }
 
-  function confirmDelete(candidate: Candidate) {
+  function confirmDelete(candidate) {
     remove.reset();
     setPendingDelete(candidate);
   }

@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { api } from '../../api/client';
-import type { Results } from '../../api/types';
 import { Dialog } from '../../components/Dialog';
 import { useToast } from '../../components/Toast';
 import { Button, ErrorAlert, Field, card } from '../../components/ui';
@@ -10,7 +9,7 @@ import { useAdminContext } from './AdminLayout';
 
 const CONFIRM_WORD = 'RESET';
 
-export function ResetElection({ results }: { results: Results }) {
+export function ResetElection({ results }) {
   const { locked } = useAdminContext();
   const queryClient = useQueryClient();
   const notify = useToast();
@@ -21,8 +20,7 @@ export function ResetElection({ results }: { results: Results }) {
   const nothingToReset = results.totalVotes === 0 && writeIns === 0;
 
   const reset = useMutation({
-    mutationFn: () =>
-      api<{ votesRemoved: number; writeInsRemoved: number }>('/election/reset', { method: 'POST' }),
+    mutationFn: () => api('/election/reset', { method: 'POST' }),
     onSuccess: ({ votesRemoved, writeInsRemoved }) => {
       for (const key of ['results', 'participation', 'candidates', 'users']) {
         void queryClient.invalidateQueries({ queryKey: [key] });
@@ -40,7 +38,7 @@ export function ResetElection({ results }: { results: Results }) {
     setOpen(true);
   }
 
-  function handleSubmit(event: FormEvent) {
+  function handleSubmit(event) {
     event.preventDefault();
     reset.mutate();
   }
