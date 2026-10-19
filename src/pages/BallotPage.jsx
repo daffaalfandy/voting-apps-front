@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { api, ApiError } from '../api/client';
-import type { Candidate, MyVote, Settings } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { Dialog } from '../components/Dialog';
 import { QueryState } from '../components/QueryState';
@@ -11,17 +10,17 @@ import { formatDateTime } from '../lib/format';
 
 const WRITE_IN = 'write-in';
 
-const normalize = (name: string) => name.trim().replace(/\s+/g, ' ');
+const normalize = (name) => name.trim().replace(/\s+/g, ' ');
 
 export function BallotPage() {
   const myVote = useQuery({
     queryKey: ['myVote'],
-    queryFn: () => api<{ vote: MyVote | null }>('/votes/me').then((res) => res.vote),
+    queryFn: () => api('/votes/me').then((res) => res.vote),
   });
 
   const settings = useQuery({
     queryKey: ['settings'],
-    queryFn: () => api<{ settings: Settings }>('/settings').then((res) => res.settings),
+    queryFn: () => api('/settings').then((res) => res.settings),
     refetchInterval: 15_000,
   });
 
@@ -56,7 +55,7 @@ function VotingNotStarted() {
   );
 }
 
-function VoteReceipt({ vote }: { vote: MyVote }) {
+function VoteReceipt({ vote }) {
   return (
     <section aria-labelledby="receipt-heading" className={`p-5 sm:p-6 ${card}`}>
       <h1 id="receipt-heading" className="text-2xl font-bold text-ink-strong">
@@ -88,12 +87,12 @@ function Ballot() {
 
   const candidates = useQuery({
     queryKey: ['candidates'],
-    queryFn: () => api<{ candidates: Candidate[] }>('/candidates').then((res) => res.candidates),
+    queryFn: () => api('/candidates').then((res) => res.candidates),
   });
 
   const cast = useMutation({
     mutationFn: () =>
-      api<{ vote: MyVote }>('/votes', {
+      api('/votes', {
         method: 'POST',
         body: choice === WRITE_IN ? { name: writeIn } : { candidateId: choice },
       }),

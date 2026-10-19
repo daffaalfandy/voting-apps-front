@@ -1,37 +1,28 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router';
-import type { User } from '../api/types';
 import { homePathFor, useAuth } from '../auth/AuthContext';
 import { Button, ErrorAlert, Field, card } from '../components/ui';
 
-interface SignInCardProps {
-  title: string;
-  intro: string;
-  secretField: { label: string; type: 'text' | 'password'; autoComplete: string; hint?: string };
-  signIn(email: string, secret: string): Promise<User>;
-  footer: ReactNode;
-}
-
-function SignInCard({ title, intro, secretField, signIn, footer }: SignInCardProps) {
+function SignInCard({ title, intro, secretField, signIn, footer }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState('');
   const [secret, setSecret] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   if (user) {
     return <Navigate to={homePathFor(user)} replace />;
   }
 
-  async function handleSubmit(event: FormEvent) {
+  async function handleSubmit(event) {
     event.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
       const signedIn = await signIn(email, secret);
-      const from = (location.state as { from?: string } | null)?.from;
+      const from = location.state?.from;
       navigate(from ?? homePathFor(signedIn), { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign-in failed. Try again.');
